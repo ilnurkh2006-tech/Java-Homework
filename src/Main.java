@@ -1,105 +1,107 @@
-final class Balance{
+final class Balance {
     private final Currency cur;
-    private final double amt;
+    private final int amt;
 
-    Balance(){
+    Balance() {
         this.cur = Currency.RUB;
         this.amt = 0;
     }
 
-    Balance(double amt){
+    Balance(int amt) {
+        if (amt < 0) {
+            throw new IllegalArgumentException("ERROR! Can't add negative!");
+        }
         this.cur = Currency.RUB;
         this.amt = amt;
     }
 
-    Balance(Currency cur){
+    Balance(Currency cur) {
         this.cur = cur;
         this.amt = 0;
     }
 
-    Balance(Currency cur, double amt){
+    Balance(Currency cur, int amt) {
+        if (amt < 0) {
+            throw new IllegalArgumentException("ERROR! Can't add negative!");
+        }
         this.cur = cur;
         this.amt = amt;
     }
 
-    Balance add(int amt_new){
-        if (amt_new < 0)
-        {
-            System.out.printf("ERROR! Can't add negative!");
-            System.exit(-1);
+    Balance add(int amt_new) {
+        if (amt_new < 0) {
+            throw new IllegalArgumentException("ERROR! Can't add negative!");
         }
-        Balance result = new Balance(this.cur, this.amt+amt_new);
+        Balance result = new Balance(this.cur, this.amt + amt_new);
         return result;
     }
 
-    Balance subtract(int amt_new){
-        if (amt_new < 0)
-        {
-            System.out.printf("ERROR! Can't add negative!");
-            System.exit(-1);
+    Balance subtract(int amt_new) {
+        if (amt_new < 0) {
+            throw new IllegalArgumentException("ERROR! Can't add negative!");
         }
-        if (this.amt <= 0)
-        {
-            System.out.printf("ERROR! Not enough!");
-            System.exit(-1);
+        if (this.amt < amt_new) {
+            throw new IllegalArgumentException("ERROR! Not enough!");
         }
-        Balance result = new Balance(this.cur, this.amt-amt_new);
+        Balance result = new Balance(this.cur, this.amt - amt_new);
         return result;
     }
 
-    Balance convert(Currency cur2){
-        double t = this.amt*this.cur.getPriceInRublesKopecks();
-        double amt = t/cur2.getPriceInRublesKopecks();
+    Balance convert(Currency cur2) {
         return new Balance(cur2, amt);
     }
 
-    void show(){
-        System.out.print("Current balance: " + amt + cur.getSymbol() + "\n");
+    void show() {
+        System.out.print("Current balance: " + amt / cur.getPriceInRublesKopecks() + cur.getSymbol() + "\n");
     }
 }
 
-final class BankAccaunt{
+final class BankAccaunt {
     private Balance bal;
     private int amt_all_op = 0;
     private int min_amt = 200;
 
-    BankAccaunt(){
+    BankAccaunt() {
         this.bal = new Balance();
     }
 
-    BankAccaunt(Balance bal){
+    BankAccaunt(Balance bal) {
         this.bal = bal;
     }
 
-    BankAccaunt(int start_amt){
+    BankAccaunt(int start_amt) {
         this.bal = new Balance(start_amt);
     }
 
-    BankAccaunt exchange(BankAccaunt bk, int amt){
-        if(amt >= min_amt)
-        {
+    BankAccaunt exchange(BankAccaunt bk, int amt) {
+        if (amt >= min_amt) {
             bk.bal = bk.bal.subtract(amt);
             this.bal = this.bal.add(amt);
-            amt_all_op+=amt;
-            bk.amt_all_op+=amt;
+            amt_all_op += amt;
+            bk.amt_all_op += amt;
         }
         return this;
     }
 
-    void show()
-    {
+    void show() {
         bal.show();
-        System.out.print("Amount of all operations: "+amt_all_op+"\n\n");
+        System.out.print("Amount of all operations: " + amt_all_op + "\n\n");
     }
 }
 
-public class Main{
+public class Main {
     public static void main(String[] args) {
         BankAccaunt t1 = new BankAccaunt(5000);
         BankAccaunt t2 = new BankAccaunt(10000);
 
+        try {
+            t1.exchange(t2, 20000);
+        } catch (Exception e) {
+            System.out.println("Something went wrong.");
+        }
+
         t1.show();
-        t1.exchange(t2,500);
+        t1.exchange(t2, 500);
         t1.show();
         t2.show();
     }
